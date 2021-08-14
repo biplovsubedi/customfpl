@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+Gameweek Stats - Anti FPL
+{% endblock title %}
+{% block headimport %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
+
+{% endblock headimport %}
+
+
+{% block content %}
+
+<div class="mx-auto pb-2 px-4 ">
+    <div class="bg-gray-100 dark:bg-gray-900 p-2">
+        {% for gw in gameweeks %}
+            <div class=" inline-block rounded-full text-white {% if gw.id == player_data.gw %} bg-blue-400 {% else %} bg-yellow-500 {% endif %} hover:bg-green-500 duration-300 text-xs px-2 opacity-90 hover:opacity-100 cursor-pointer">
+                <a href="{% url 'antifpl:prev-gw-stats' gw.id %}">GW-{{ gw.id }}</a>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="overflow-x-auto bg-white overflow-y-auto relative p-1">
+        <h2 class="sm:text-3xl text-2xl text-gray-900 font-medium title-font mb-2">Player Statistics - Gameweek {{current_gw }}</h2>  
+        <table name="gw-stats" id="gw-stats" class="table table-striped display compact" style="width:100%">
+            <thead pt-2 mt-2>
+                <tr class="text-left">
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Team</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Name</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Cost</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Form (5 GW)</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Form (Season)</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Points Per Million (5 GW)</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Points Per Million (Season)</th>
+                    
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Minutes</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Points</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Anti Points</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Starting XI</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Squad</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Captained</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">C/VC</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in player_data %}
+                <tr>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.footballer.team.short_name }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">
+                        <a class=" font-bold text-blue-700 hover:text-blue-500" href="{% url 'antifpl:footballer' player.footballer.id %}">
+                        {{ player.footballer.name }}
+                        </a>
+                    </td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.footballer.cost }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.footballer.form_5_gw }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.footballer.form_season }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.footballer.points_per_mil_5_gw }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.footballer.points_per_mil_season }}</td>
+
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.minutes|default_if_none:"" }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.points|default_if_none:"" }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.anti_points }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.starting_xi }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.squad_xv }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.captains }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.cvc }}</td>
+                    {% comment %} <td>{{ player.footballer.cvc }}</td> {% endcomment %}
+                    
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+        
+
+    
+
+</div>
+{% endblock content %}
+
+{% block javascript_end %}
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+<script>
+$(document).ready( function () {
+    $('#gw-stats').DataTable({
+    "order": [
+                [10, "desc"]
+            ],
+            "pageLength": 50
+    });
+} );
+
+</script>
+
+{% endblock javascript_end %}

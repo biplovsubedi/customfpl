@@ -3,14 +3,30 @@
 {% load static %}
 
 {% block title %}
-Custom FPL
+Anti FPL
 {% endblock title %}
 
 
-{% block content %}\
+{% block content %}
 
-<div class="container">
 
-Welcome to Custom FPL
+      
+<div class="container mx-auto h-screen px-6 flex items-center justify-between">
+  <div class="container mx-auto px-6 flex flex-col-reverse lg:flex-row justify-between items-center relative">
+      <div class="w-full  text-center lg:text-left">
+          <h1 class="font-light font-sans text-center lg:text-left text-5xl lg:text-8xl mt-2 md:mt-0 text-gray-700">
+              Welcome to <span class="font-bold">Anti </span> Fantasy Premier League
+          </h1>
+          <a href="{% url 'antifpl:points-table' %}">
+            <button class="px-2 py-2 w-36 mt-16 font-light transition ease-in duration-200 rounded-lg hover:bg-red-600 border-2 text-lg border-gray-700 bg-red-300 focus:outline-none">
+                Points Table
+            </button>
+          </a>
+      </div>
+      <div class="block w-full mx-auto md:mt-0 relative max-w-md lg:max-w-2xl opacity-70">
+          <img src="{% static 'images/premred.png' %}"/>
+      </div>
+  </div>
 </div>
+
 {% endblock content %}

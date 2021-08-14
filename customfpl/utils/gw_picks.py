@@ -5,6 +5,8 @@ from utils.url_endpoints import URL_GW_PICKS
 from .jsondata import JsonData
 from dataclasses import dataclass
 
+from os.path import join
+
 
 @dataclass
 class Squad:
@@ -40,7 +42,7 @@ class Squad:
                 if pick["is_vice_captain"]:
                     self.vice_captain = pick["element"]
                 # TODO namedtuple
-                team.append((pick["element"], pick["multiplier"]))
+                self.team.append((pick["element"], pick["multiplier"]))
         except KeyError:
             print("Raise Exception")
 
@@ -110,7 +112,9 @@ class GameweekPicks(JsonData):
     def __init__(self, gw):
         self.gw = gw
         self.all_managers_id = None
-        self.storage_file_path = f"{self.storage_root}/gameweek_picks/{gw}.json"
+        self.storage_file_path = join(
+            self.storage_root, join("gameweek_picks", f"{gw}.json")
+        )
         self.gw_picks = None
 
     def _get_all_managers_id(self):
@@ -144,7 +148,7 @@ class GameweekPicks(JsonData):
             # entry_id = player['entry']
             if (
                 picks := request_data_from_url(
-                    URL_GW_PICKS.format(entry=entry_id, gw=gw)
+                    URL_GW_PICKS.format(entry=entry_id, gw=self.gw)
                 )
             ) != None:
                 complete_gw_picks[entry_id] = picks
@@ -156,7 +160,7 @@ class GameweekPicks(JsonData):
         _gw_picks = self.read_json_data()
         if _gw_picks:
             self.gw_picks = _gw_picks
-            return gw_picks
+            return _gw_picks
 
         # This Gw picks isn't saved, so we need to donwload
         # and save gw picks for each manager

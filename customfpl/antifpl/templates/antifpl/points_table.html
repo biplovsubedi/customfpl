@@ -1,17 +1,130 @@
 {% extends "base.html" %}
+{% load antifpl_template_filters %}
 
 {% load static %}
 
 {% block title %}
-Anti FPL Points Table
+Points Table - GW {{ current_gw.id }} - Anti FPL
 {% endblock title %}
+{% block headimport %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/datatable-all-lib.css' %}"
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
+    
+{% endblock headimport %}
 
 
 {% block content %}
 
-<div class="container">
+<div class=" mx-auto pb-2 px-4 ">
+    <div class="bg-gray-100 dark:bg-gray-900 p-2">
+        {% for gw in gameweeks %}
+            <div class=" inline-block rounded-full text-white {% if gw.id == current_gw.id  %} bg-blue-400 {% else %} bg-yellow-500 {% endif %} hover:bg-green-500 duration-300 text-xs px-2 opacity-90 hover:opacity-100 cursor-pointer">
+                <a href="{% url 'antifpl:prev-points-table' gw.id %}">GW-{{ gw.id }}</a>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="overflow-x-auto bg-white overflow-y-auto relative p-1">
+        <h2 class="sm:text-3xl text-2xl text-gray-900 font-medium title-font mb-2">
+        Anti Fantasy Points Table - Gameweek {{ current_gw.id }} ({% if current_gw.completed %}Completed{% else %}Live{% endif %})
+        </h2>  
+        <table name="gw-stats" id="gw-stats" class="table table-striped display compact" style="width:100%">
+            <thead pt-2 mt-2>
+                <tr class="text-left">
+                    <th></th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">GW Rank</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Last Rank</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Manager</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Team</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Team Value</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Bank</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Transfers</th>
+                    {% comment %} <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Hits</th> {% endcomment %}
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Chip</th>
+                    {% if current_gw.completed %}
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">C/VC Pens</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Inactive Players</th>
+                    {% endif %}
+                    
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Last GW</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Site Points</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">GW Points (With Pens)</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Total</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">History</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for manager in anti_table %}
+                <tr>
+                    <td>
+                        {% if manager.rank < manager.last_rank %}
+                            <span style="color: green; margin: 0; padding: 0;">&#10506;</span>
+                        {% elif manager.rank > manager.last_rank %}
+                            <span style="color: red;"> &#10507;</span>
+                        {% endif %}
+                    </td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.rank }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.last_rank }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm text-blue-900 hover:text-blue-600 ">
+                        <a target="_blank"
+                        href="https://fantasy.premierleague.com/entry/{{ manager.manager.team_id }}/event/{{ current_gw.id }}">
+                            {{ manager.manager.manager_name }}
+                        </a>
+                    </td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.manager.team_name }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.team_value|normalize_team_value }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm 
+                        {% if manager.itb > 30 %} text-red-700 font-bold {% endif %}">
+                        {{ manager.itb|normalize_team_value }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.transfers|remove_zero }}
+                        {% if manager.transfers_hits > 0 %}
+                        ({{ manager.transfers_hits|remove_zero }})
+                        {% endif %}
+                    </td>
+                    {% comment %} <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.transfers_hits|remove_zero }}</td> {% endcomment %}
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.chip|default_if_none:"" | safe }}</td>
+                    {% if current_gw.completed %}
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.cvc_pens|remove_zero }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.inactive_players|remove_zero }}</td>
+                    {% endif %}
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.last_gw }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.site_points }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.gw_points }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.total }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">
+                        <a href="{% url 'antifpl:manager' manager.manager.pk %}" class="text-blue-700 hover:text-blue-500">
+                        Detail</a>
+                    </td>
+                    
+                    
 
-{{ test }}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+        
+
+    
 
 </div>
 {% endblock content %}
+
+{% block javascript_end %}
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+<script>
+$(document).ready( function () {
+    $('#gw-stats').DataTable({
+       "order": [
+            [1, "asc"]
+        ],
+        "pageLength": 50
+    });
+} );
+
+</script>
+
+{% endblock javascript_end %}

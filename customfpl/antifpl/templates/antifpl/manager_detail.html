@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load antifpl_template_filters %}
+
+{% load static %}
+
+{% block title %}
+{{ manager.team_name }} - Anti FPL
+{% endblock title %}
+{% block headimport %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/datatable-all-lib.css' %}"
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
+    
+{% endblock headimport %}
+
+
+{% block content %}
+
+<div class="container mx-auto pb-2 ">
+    <div class="bg-gray-100 dark:bg-gray-900 p-2">
+        {% for gw in gameweeks %}
+            <div class=" inline-block rounded-full text-white {% if gw.id == current_gw.id  %} bg-blue-400 {% else %} bg-yellow-500 {% endif %} hover:bg-green-500 duration-300 text-xs px-2 opacity-90 hover:opacity-100 cursor-pointer">
+                <a href="{% url 'antifpl:prev-points-table' gw.id %}">GW-{{ gw.id }}</a>
+            </div>
+        {% endfor %}
+    </div>
+        <h3 class="sm:text-3xl text-2xl text-gray-900 font-medium title-font mb-2">
+        {{ manager.team_name }} - {{ manager.manager_name }}
+        </h3>  
+        <table name="gw-stats" id="gw-stats" class="table table-striped display compact" style="width:100%">
+            <thead pt-2 mt-2>
+                <tr class="text-left">
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">GW Rank</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Last Rank</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Gameweek</th>
+
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Team Value</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Bank</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Transfers</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Transfer Cost</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Chip</th>
+                    
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">C/VC Pens</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Inactive Players</th>
+                    
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Last GW</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Site Points</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">GW Points (With Pens)</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Total</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs "></th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for ptable in manager_history %}
+                <tr>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ ptable.rank }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ ptable.last_rank }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ ptable.gw }} (<a href="{% url 'antifpl:prev-points-table' ptable.gw %}" class="text-blue-700 hover:text-blue-500">
+                        Table</a>/<a href="{% url 'antifpl:prev-gw-stats' ptable.gw %}" class="text-blue-700 hover:text-blue-500">
+                        Stats</a>)</td>
+
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ ptable.team_value }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ ptable.itb }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ ptable.transfers|remove_zero }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ ptable.transfers_hits|remove_zero }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ ptable.chip|default_if_none:"" | safe }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ ptable.cvc_pens|remove_zero|default_if_none:"" | safe }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ ptable.inactive_players|remove_zero|default_if_none:"" | safe }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ ptable.last_gw }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ ptable.site_points }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ ptable.gw_points }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ ptable.total }}</td>
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">
+                        <a target="_blank" class="text-blue-800 hover:text-blue-500"
+                        href="https://fantasy.premierleague.com/entry/{{ manager.team_id }}/event/{{ptable.gw }}/">
+                            Team
+                        </a>
+                        
+                    </td>
+                    
+                    
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        
+
+    
+
+</div>
+{% endblock content %}
+
+{% block javascript_end %}
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+<script>
+$(document).ready( function () {
+    $('#gw-stats').DataTable({
+       "order": [
+            [0, "desc"]
+        ],
+        "pageLength": 40
+    });
+} );
+
+</script>
+
+{% endblock javascript_end %}

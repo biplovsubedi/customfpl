@@ -16,6 +16,7 @@ class GameweekService:
         self.current_gw = None
         self.players_data = None
         self.players_points = None
+        self.players_stats = None
         self.players_minutes = None
         self.live_request_time = timezone.now() - datetime.timedelta(
             minutes=(st.MAX_REFRESH_MINS + 1)
@@ -165,3 +166,28 @@ class GameweekService:
             _players_points[p["id"]] = p["stats"]["total_points"]
         self.players_points = _players_points
         return _players_points
+
+    def get_players_stats(self, gw=None, only_played=False):
+        """Extract the points and playing minutes for all players in a gw
+        Args:
+            gw (int): gameweek
+            only_played(bool) : don't add players that have 0 mins
+                used for dream team
+
+        Returns:
+            dict: contains player's id(key) and mintues(val)
+        """
+        if self.players_stats:
+            return self.players_stats
+
+        players = self.get_gw_players_data()
+        _players_stats = {}
+        for p in players:
+            if only_played and p["stats"]["minutes"] == 0:
+                continue
+            _players_stats[p["id"]] = {
+                "points": p["stats"]["total_points"],
+                "minutes": p["stats"]["minutes"],
+            }
+        self.players_points = _players_stats
+        return _players_stats

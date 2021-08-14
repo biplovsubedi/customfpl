@@ -18,21 +18,20 @@ class JsonData:
 
         self.storage_file_path = None
 
-    def __new__(cls, *args, **kwargs):
-        if cls is JsonData:
-            raise TypeError("json data may not be instantiated")
-        return object.__new__(cls, *args, **kwargs)
+    # def __new__(cls, *args, **kwargs):
+    #     if cls is JsonData:
+    #         raise TypeError("json data may not be instantiated")
+    #     return super(JsonData, cls).__new__(cls, *args, **kwargs)
 
     def read_json_data(self):
         if not self.storage_file_path:
             print("Raise exception")
             return None
-
-        with open(self.storage_file_path, "r") as f:
-            try:
+        try:
+            with open(self.storage_file_path, "r") as f:
                 return json.loads(f.read())
-            except:
-                return None
+        except:
+            return None
 
     def write_json_data(self, data):
         if not self.storage_file_path:

@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load antifpl_template_filters %}
+
+{% load static %}
+
+{% block title %}
+{{ footballer.name }} - Anti FPL
+{% endblock title %}
+{% block headimport %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/datatable-all-lib.css' %}"
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
+    
+{% endblock headimport %}
+
+
+{% block content %}
+
+<div class="container mx-auto pb-2 ">
+    <div class="bg-gray-100 dark:bg-gray-900 p-2">
+        {% for gw in gameweeks %}
+            <div class=" inline-block rounded-full text-white {% if gw.id == current_gw.id  %} bg-blue-400 {% else %} bg-yellow-500 {% endif %} hover:bg-green-500 duration-300 text-xs px-2 opacity-90 hover:opacity-100 cursor-pointer">
+                <a href="{% url 'antifpl:prev-points-table' gw.id %}">GW-{{ gw.id }}</a>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="container px-5 mx-auto pb-4 border-b-2">
+        <h3 class="sm:text-3xl text-2xl text-gray-900 font-medium title-font mb-2">
+        {{ footballer.name }} ({{ footballer.team.name }}) - {{ footballer.position }}
+        </h3>  
+        
+        <div class="flex flex-wrap -m-4 text-center justify-around">
+            
+            <div class="p-4">
+                <h2 class="title-font font-medium text-3xl text-gray-900">{{ footballer.cost|normalize_team_value }}</h2>
+                <p class="leading-relaxed">Cost</p>
+            </div>
+            <div class="p-4">
+                <h2 class="title-font font-medium text-3xl text-gray-900">{{ footballer.goals_scored }}</h2>
+                <p class="leading-relaxed">Goals</p>
+            </div>
+            <div class="p-4">
+                <h2 class="title-font font-medium text-3xl text-gray-900">{{ footballer.assists }}</h2>
+                <p class="leading-relaxed">Assists</p>
+            </div>
+            <div class="p-4">
+                <h2 class="title-font font-medium text-3xl text-gray-900">{{ footballer.clean_sheets }}</h2>
+                <p class="leading-relaxed">Clean Sheets</p>
+            </div>
+            <div class="p-4">
+                <h2 class="title-font font-medium text-3xl text-gray-900">{{ footballer.goals_conceded }}</h2>
+                <p class="leading-relaxed">Goals Conceded</p>
+            </div>
+            <div class="p-4">
+                <h2 class="title-font font-medium text-3xl text-yellow-600">{{ footballer.yellow_cards }}</h2>
+                <p class="leading-relaxed text-yellow-600">Yellows</p>
+            </div>
+            <div class="p-4">
+                <h2 class="title-font text-red-600 font-medium text-3xl ">{{ footballer.red_cards }}</h2>
+                <p class="leading-relaxed text-red-600">Reds</p>
+            </div>
+        </div>
+        <div class="flex flex-wrap -m-4 text-center justify-around">
+            
+            <div class="p-4">
+                <h2 class="title-font font-medium text-3xl text-gray-900">{{ footballer.form_5_gw }}</h2>
+                <p class="leading-relaxed">Form (5 GW)</p>
+            </div>
+            <div class="p-4">
+                <h2 class="title-font font-medium text-3xl text-gray-900">{{ footballer.form_season }}</h2>
+                <p class="leading-relaxed">Form (Season)</p>
+            </div>
+            <div class="p-4">
+                <h2 class="title-font font-medium text-3xl text-gray-900">{{ footballer.points_per_mil_5_gw }}</h2>
+                <p class="leading-relaxed">Point Per Million (5 GW)</p>
+            </div>
+            <div class="p-4">
+                <h2 class="title-font font-medium text-3xl text-gray-900">{{ footballer.points_per_mil_season }}</h2>
+                <p class="leading-relaxed">Points Per Million (Season)</p>
+            </div>
+           
+        </div>
+    </div>
+    <div class="overflow-x-auto bg-white overflow-y-auto relative p-1">
+        <table name="gw-stats" id="gw-stats" class="table table-striped display compact" style="width:100%">
+            <thead pt-2 mt-2>
+                <tr class="text-left">
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">GW</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Cost</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Form (5 GW)</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Form (Season)</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Points Per Million (5 GW)</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Points Per Million (Season)</th>
+                    
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Minutes</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Points</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Anti Points</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Starting XI</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Squad</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Captained</th>
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">C/VC</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for performance in footballer_performance %}
+                <tr>
+                    
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.gw.id }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.footballer.cost|normalize_team_value }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.form_5_gw }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.form_season }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.points_per_mil_5_gw }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.points_per_mil_season }}</td>
+
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.minutes|default_if_none:"" }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.points|default_if_none:"" }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.anti_points }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.starting_xi }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.squad_xv }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.captains }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.cvc }}</td>
+                    {% comment %} <td>{{ player.footballer.cvc }}</td> {% endcomment %}
+                    
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    
+
+</div>
+{% endblock content %}
+
+{% block javascript_end %}
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+<script>
+$(document).ready( function () {
+    $('#gw-stats').DataTable({
+       "order": [
+            [0, "desc"]
+        ],
+        "pageLength": 40
+    });
+} );
+
+</script>
+
+{% endblock javascript_end %}

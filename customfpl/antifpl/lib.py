@@ -1,14 +1,21 @@
-from utils.jsondata import JsonData
-from utils.gameweek_service import GameweekService
-from fplservice.models import Gameweek
-from django.core.exceptions import ObjectDoesNotExist
-import antifpl.models as anti
-from utils.gw_picks import GameweekPicks, Picks, Squad
+import datetime
+from collections import defaultdict
 from operator import itemgetter
+
+from django.conf import settings as st
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.utils import timezone
-from django.conf import settings as st
-import datetime
+from fplservice.management.commands.add_new_footballers import (
+    add_update_footballers_meta,
+)
+from fplservice.models import Footballer, Gameweek
+from utils.gameweek_service import GameweekService
+from utils.gw_picks import GameweekPicks, Picks, Squad
+from utils.jsondata import JsonData
+from os.path import join
+import antifpl.models as anti
+from django.db.models import Avg
 
 CAPTAIN_PENALTY = 15
 INACTIVE_PLAYER_PENALTY = 9
@@ -27,8 +34,9 @@ class Antifpl(JsonData):
     """
 
     def __init__(self):
-        # self.storage_file_path = f"{self.storage_root}/antifpl_data/{gw}.json"
-        self.storage_file_path = f"{self.storage_root}/antifpl_data/live.json"
+        self.storage_file_path = join(
+            self.storage_root, join("antifpl_data", "live.json")
+        )
         self.gameweek_service = GameweekService()
         self.gw = self.gameweek_service.find_current_gw()
 
@@ -66,7 +74,8 @@ class Antifpl(JsonData):
         total_players = 15 if picks.active_chip == "bboost" else 11
 
         for p in picks.squad.team:
-            if p["multiplier"] != 0 and player_minutes[p["element"]] != 0:
+            if p[1] != 0 and player_minutes[p[0]] != 0:
+                # p = (element, multiplier) tuple
                 active_cnt += 1
         return abs(total_players - active_cnt)
 
@@ -93,32 +102,35 @@ class Antifpl(JsonData):
         Bank Penalty: More than 3.0 in the bank
         Penalty of 25 points
         """
-        return BANK_PENALTY if itb > 3.0 else 0
+        return BANK_PENALTY if itb > 30 else 0
 
     def complete_gameweek(self):
         """This function is called when a gameweek is completed and all
         the gameweek related info needs to be saved
         """
+
+        self.gameweek_picks = GameweekPicks(gw=self.gw)
+
         # Delete cached json to get new data
         self.gameweek_picks.delete_json_data()
 
-        self.gameweek_picks = GameweekPicks(gw=self.gw)
         all_managers_picks = self.gameweek_picks.get_gw_picks()
 
         # Get the points scored by all the players
         all_players_points = self.gameweek_service.get_players_points()
         all_players_mins = self.gameweek_service.get_players_minutes()
 
-        last_gw_points = self.get_last_gw_points()
+        last_gw_points_dict = self.get_last_gw_points()
 
         # Finalize the points scored by all the players
         final_gw_total = []
         for team_id, gw_picks in all_managers_picks.items():
+            team_id = int(team_id)
             picks = Picks(gw_picks)
             try:
-                last_gw_points = last_gw_points[team_id]
+                last_gw_points = last_gw_points_dict[team_id]
             except KeyError:
-                print("Raise Error")
+                print("Raise Error - No points last gw")
                 last_gw_points = 0
 
             inactive_players = self.__class__.get_inactive_players(
@@ -161,21 +173,19 @@ class Antifpl(JsonData):
                 team_id = points["team_id"]
                 del points["team_id"]
                 try:
-                    anti.PointsTable.objects.get(
-                        manager=anti.Manager.objects.get(team_id=team_id), gw=self.gw
+                    anti.PointsTable.objects.filter(
+                        manager__team_id=team_id, gw=self.gw
                     ).update(**points)
-                except ObjectDoesNotExist as e:
-                    print(f"Raise Error - {e}")
-            Gameweek.objects.get(id=self.gw).update(last_updated=timezone.now())
+                except Exception as e:
+                    print(f"Raise Error - Completing gw - {e}")
+            Gameweek.objects.filter(id=self.gw).update(
+                last_updated=timezone.now(), completed=True
+            )
 
     @staticmethod
     def calculate_live_points(squad, all_players_points: dict):
-        return sum(
-            [
-                player["multiplier"] * all_players_points[player["element"]]
-                for player in squad.team
-            ]
-        )
+        # print(squad.team[0])
+        return sum([player[1] * all_players_points[player[0]] for player in squad.team])
 
     def update_gameweek(self):
         """This function is called when a gameweek is live and all
@@ -194,14 +204,15 @@ class Antifpl(JsonData):
         # Get the points scored by all the players
         all_players_points = self.gameweek_service.get_players_points()
 
-        last_gw_points = self.get_last_gw_points()
+        last_gw_points_dict = self.get_last_gw_points()
 
         # Finalize the points scored by all the players
         final_gw_total = []
         for team_id, gw_picks in all_managers_picks.items():
+            team_id = int(team_id)
             picks = Picks(gw_picks)
             try:
-                last_gw_points = last_gw_points[team_id]
+                last_gw_points = last_gw_points_dict[team_id]
             except KeyError:
                 print(f"Raise Error _ No last gw points {team_id} ")
                 last_gw_points = 0
@@ -233,53 +244,57 @@ class Antifpl(JsonData):
                 team_id = points["team_id"]
                 del points["team_id"]
                 try:
-                    anti.PointsTable.objects.get(
-                        manager=anti.Manager.objects.get(team_id=team_id), gw=self.gw
+                    anti.PointsTable.objects.filter(
+                        manager__team_id=team_id, gw=self.gw
                     ).update(**points)
                 except ObjectDoesNotExist:
-                    print("Raise Error")
-            Gameweek.objects.get(id=self.gw).update(last_updated=timezone.now())
+                    print("Raise Error - couldn't update points table")
+            Gameweek.objects.filter(id=self.gw).update(last_updated=timezone.now())
 
     def start_gameweek(self):
         """This function is called when a new gameweek starts and all the
 
         gameweek related information in the pointstable needs to be created
         """
-        # Delete cached json to get new data
-        self.gameweek_picks.delete_json_data()
+        # Update footballer meta
+        add_update_footballers_meta()
 
         self.gameweek_picks = GameweekPicks(gw=self.gw)
         all_managers_picks = self.gameweek_picks.get_gw_picks()
 
-        last_gw_points = self.get_last_gw_points()
+        last_gw_points_dict = self.get_last_gw_points()
+        last_gw_rank_dict = self.get_last_gw_rank()
 
         new_gw_list = []
         for team_id, gw_picks in all_managers_picks.items():
+            team_id = int(team_id)
             picks = Picks(gw_picks)
             try:
-                last_gw_points = last_gw_points[team_id]
+                last_gw_points = last_gw_points_dict[team_id]
             except KeyError:
-                print("Raise Error")
+                print("Raise Error - no last gw points")
                 last_gw_points = 0
             try:
-                last_gw_rank = last_gw_rank[team_id]
+                last_gw_rank = last_gw_rank_dict[team_id]
             except KeyError:
-                print("Raise Error")
+                print("Raise Error - no last gw rank")
                 last_gw_rank = -1
 
             transfer_hits = picks.transfers_cost
-            bank_penalty = get_bank_penalty(picks.bank)
+            bank_penalty = self.__class__.get_bank_penalty(picks.bank)
             gw_points = picks.points + bank_penalty + transfer_hits
             total = gw_points + last_gw_points
 
             new_gw_list.append(
                 {
                     "team_id": team_id,
+                    "team_value": picks.team_value,
                     "itb": picks.bank,
                     "transfers": picks.transfers,
                     "transfers_hits": picks.transfers_cost,
                     "chip": picks.active_chip,
                     "last_gw": last_gw_points,
+                    "last_rank": last_gw_rank,
                     "site_points": picks.points,
                     "gw_points": gw_points,
                     "total": total,
@@ -294,20 +309,164 @@ class Antifpl(JsonData):
                     anti.PointsTable.objects.create(
                         manager=anti.Manager.objects.get(team_id=team_id),
                         gw=self.gw,
+                        team_value=item["team_value"],
                         itb=item["itb"],
                         transfers=item["transfers"],
                         transfers_hits=item["transfers_hits"],
                         chip=item["chip"],
-                        chiplast_gw=item["chiplast_gw"],
+                        last_gw=item["last_gw"],
+                        rank=0,  # TODO fix this, rank can't be zero
+                        last_rank=item["last_rank"],
                         site_points=item["site_points"],
                         gw_points=item["gw_points"],
                         total=item["total"],
                     )
-                except:
-                    print("Raise Error")
-            Gameweek.objects.get(id=self.gw).update(last_updated=timezone.now())
+                except Exception as e:
+                    print(f"Raise Error - starting gw create new objects - {e} ")
+            Gameweek.objects.filter(id=self.gw).update(last_updated=timezone.now())
 
-    def get_data(self):
+    def update_gw_form_stats_footballer(self):
+        """Update the form stats of all the footballers"""
+        all_footballers_performance = anti.FootballerPerformanceAnti.objects.filter(
+            gw__id=self.gw
+        )
+        for footballer_performance in all_footballers_performance:
+
+            form_5gw = anti.FootballerPerformanceAnti.objects.filter(
+                gw__id__gt=self.gw - 5, footballer=footballer_performance.footballer
+            ).aggregate(Avg("anti_points"))["anti_points__avg"]
+            form_season = anti.FootballerPerformanceAnti.objects.filter(
+                footballer=footballer_performance.footballer
+            ).aggregate(Avg("anti_points"))["anti_points__avg"]
+
+            ppm_5gw = round(form_5gw / float(footballer_performance.footballer.cost), 3)
+            ppm_season = round(
+                form_season / float(footballer_performance.footballer.cost), 3
+            )
+
+            with transaction.atomic():
+                footballer_performance.form_5_gw = form_5gw
+                footballer_performance.form_season = form_season
+                footballer_performance.price_per_mil_5_gw = ppm_5gw
+                footballer_performance.price_per_mil_season = ppm_season
+                footballer_performance.save()
+
+                Footballer.objects.filter(
+                    id=footballer_performance.footballer.id
+                ).update(
+                    form_5_gw=form_5gw,
+                    form_season=form_season,
+                    points_per_mil_5_gw=ppm_5gw,
+                    points_per_mil_season=ppm_season,
+                )
+
+    def update_dynamic_stats_footballer(self, gw_completed=False):
+        """For all the players playing in this gw,
+        update the playing minutes, points, etc
+        """
+
+        # Get the playing minutes, points of each footballer and update that
+        # Also update anti points if gw completed
+
+        all_players_stats = self.gameweek_service.get_players_stats()
+
+        break_flag = False
+
+        with transaction.atomic():
+            for footballer_id, stats in all_players_stats.items():
+                footballer_id = int(footballer_id)
+                anti_points = (
+                    9 if gw_completed and stats["minutes"] == 0 else stats["points"]
+                )
+                try:
+                    footballer_performance = anti.FootballerPerformanceAnti.objects.get(
+                        gw=self.gw, footballer__id=footballer_id
+                    )
+                    # anti.FootballerPerformanceAnti.objects.filter(
+                    #     gw=self.gw, footballer__id=footballer_id
+                    # ).update(
+                    #     minutes=stats["minutes"],
+                    #     points=stats["points"],
+                    #     anti_points=anti_points,
+                    # )
+                    footballer_performance.minutes = stats["minutes"]
+                    footballer_performance.points = stats["points"]
+                    footballer_performance.anti_points = anti_points
+                    footballer_performance.save()
+                except ObjectDoesNotExist:
+                    break_flag = True
+                    break
+        if break_flag:
+            self.start_stats_footballer()
+            return None
+
+        if gw_completed:
+            # Update season player statistics
+            self.update_gw_form_stats_footballer()
+
+            Gameweek.objects.filter(id=self.gw).update(
+                stats_completed=True, last_stats_updated=timezone.now()
+            )
+
+    def start_stats_footballer(self):
+        """Get and store the static stats for the GW
+
+        This includes, player ownerships (starting xi, squad)
+        captaincy selections
+        """
+        self.gameweek_picks = GameweekPicks(gw=self.gw)
+        all_managers_picks = self.gameweek_picks.get_gw_picks()
+
+        footballer_dict = defaultdict(
+            lambda: {"starting_xi": 0, "squad_xv": 0, "captains": 0, "cvc": 0}
+        )
+
+        for team_id, gw_picks in all_managers_picks.items():
+            picks = Picks(gw_picks)
+
+            # Update both captain and vice captain for this pick
+            footballer_dict[picks.squad.captain]["captains"] += 1
+            footballer_dict[picks.squad.captain]["cvc"] += 1
+            footballer_dict[picks.squad.vice_captain]["cvc"] += 1
+
+            for footballer, multiplier in picks.squad.team:
+                # team is tuple of (player, multiplier)
+                if multiplier:
+                    footballer_dict[footballer]["starting_xi"] += 1
+                footballer_dict[footballer]["squad_xv"] += 1
+
+        # At this point the dict is constructed
+        # We need to get all the players in the game
+        # To get all the players, we can use gameweek_service method to get all players mintues
+        # And for any player in the dict add this data
+        # Get the points scored by all the players
+        all_players_minutes = self.gameweek_service.get_players_minutes()
+
+        for footballer_id in all_players_minutes.keys():
+            try:
+                footballer = Footballer.objects.get(id=footballer_id)
+            except ObjectDoesNotExist:
+                # this means that the data about footballers isn't up to date
+                # new players are added, so refresh data
+                add_update_footballers_meta()
+                continue
+
+            with transaction.atomic():
+                stat = footballer_dict[footballer_id]
+                try:
+                    anti.FootballerPerformanceAnti.objects.create(
+                        footballer=footballer,
+                        gw=Gameweek.objects.get(id=self.gw),
+                        starting_xi=stat["starting_xi"],
+                        squad_xv=stat["squad_xv"],
+                        captains=stat["captains"],
+                        cvc=stat["cvc"],
+                    )
+                except Exception as e:
+                    print(e)
+                    # This entry is already created
+
+    def get_anti_points_table(self):
 
         try:
             self.gameweek = Gameweek.objects.get(id=self.gw)
@@ -326,9 +485,9 @@ class Antifpl(JsonData):
             # This GW needs to start
             self.start_gameweek()
             with transaction.atomic():
-                Gameweek.objects.get(id=self.gw).update(is_current=True)
-                Gameweek.objects.get(id=self.gw - 1).update(is_current=False)
-            return anti.PointsTable.objects.filter(gw=self.gw)
+                Gameweek.objects.filter(id=self.gw).update(is_current=True)
+                Gameweek.objects.filter(id=self.gw - 1).update(is_current=False)
+            # return anti.PointsTable.objects.filter(gw=self.gw)
 
         # At this stage, it is current gw, but not completed
         # check if the gameweek has been completed (in fantasypl api)
@@ -342,8 +501,33 @@ class Antifpl(JsonData):
         # First check when was the GW last updated,
         # If it is more than st.MAX_REFRESH_MINS then refresh data
         if timezone.now() > self.gameweek.last_updated + datetime.timedelta(
-            st.MAX_REFRESH_MINS
+            minutes=st.MAX_REFRESH_MINS
         ):
+            print("fsfjsfkj")
             self.update_gameweek()
-
+        print(
+            timezone.now(),
+            self.gameweek.last_updated
+            + datetime.timedelta(minutes=st.MAX_REFRESH_MINS),
+        )
         return anti.PointsTable.objects.filter(gw=self.gw)
+
+    def get_footballer_stats(self):
+        # Check comments for get_data
+        try:
+            self.gameweek = Gameweek.objects.get(id=self.gw)
+        except ObjectDoesNotExist:
+            print(f"Raise Error - get_data - {self.gw}")
+
+        if self.gameweek.completed and self.gameweek.stats_completed:
+            return anti.FootballerPerformanceAnti.objects.filter(gw=self.gw)
+
+        if self.gameweek.completed:
+            # Stats not completed
+            self.update_dynamic_stats_footballer(gw_completed=True)
+
+        if timezone.now() > self.gameweek.last_stats_updated + datetime.timedelta(
+            minutes=st.MAX_REFRESH_MINS
+        ):
+            self.update_dynamic_stats_footballer()
+        return anti.FootballerPerformanceAnti.objects.filter(gw=self.gw)

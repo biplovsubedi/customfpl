@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+Anti FPL Rules
+{% endblock title %}
+
+
+{% block content %}
+
+       
+<div class="container px-5 mx-auto pb-2">
+    <h2 class="sm:text-3xl text-2xl title-font font-medium text-gray-900 border-b-2 dark:text-gray-200 dark:border-gray-500 ">General Rules</h2>
+    <div class="flex ">
+        <div class="p-1 w-1/2 flex flex-wrap md:flex-nowrap rounded-lg border-1 mr-2 dark:border-gray-500">
+            <div class="md:flex-grow">
+                <h2 class="text-2xl font-medium text-gray-900 title-font mb-2 dark:text-gray-200">
+                    Scoring
+                </h2>
+                <p class="leading-relaxed dark:text-gray-300">
+                    All the scoring will be done in this web application (Please message in the discord channel if you find some errors)
+                </p>
+            </div>
+        </div>
+        <div class="p-1 w-1/2 flex flex-wrap md:flex-nowrap rounded-lg border-1 ml-2 dark:border-gray-500">
+            <div class="md:flex-grow">
+                <h2 class="text-2xl font-medium text-gray-900 title-font mb-2 dark:text-gray-200">
+                    Non Anti Teams
+                </h2>
+                <p class="leading-relaxed dark:text-gray-300">
+                   Teams that are playing regular fantasy (score lot of points, start premiums) will be kicked out of the league.</p>
+            </div>
+        </div>
+    </div>
+    <div class="flex ">
+        <div class="p-1 w-1/2 flex flex-wrap md:flex-nowrap rounded-lg border-1 mr-2 dark:border-gray-500">
+            <div class="md:flex-grow">
+                <h2 class="text-2xl font-medium text-gray-900 title-font mb-2 dark:text-gray-200">
+                    Dead Teams
+                </h2>
+                <p class="leading-relaxed dark:text-gray-300">
+                    Teams that are not active for a few Gameweeks will be kicked out of the league.</p>
+
+            </div>
+        </div>
+        <div class="p-1 w-1/2 flex flex-wrap md:flex-nowrap rounded-lg border-1 ml-2 dark:border-gray-500">
+            <div class="md:flex-grow">
+                <h2 class="text-2xl font-medium text-gray-900 title-font mb-2 dark:text-gray-200">
+                    Repeated Offense
+                </h2>
+                <p class="leading-relaxed dark:text-gray-300">
+                   Teams that regularly break rules (regular bank penalty, etc) will be kicked out of the league.  </p>
+
+            </div>
+        </div>
+    </div>
+    <h2 class="sm:text-3xl text-2xl title-font font-medium text-gray-900 border-b-2 dark:text-gray-200 dark:border-gray-500 ">Scoring Method</h2>
+    <div class="flex ">
+        <div class="p-1 w-1/2 flex flex-wrap md:flex-nowrap rounded-lg border-1 mr-2 dark:border-gray-500">
+            <div class="md:flex-grow">
+                <h2 class="text-2xl font-medium text-gray-900 title-font mb-2 dark:text-gray-200">
+                    Inactive Player Penalty
+                </h2>
+                <p class="leading-relaxed dark:text-gray-300">
+                    At the end of the week after (auto-subs have been made) if you have any players in your final lineup 
+                that played<b> 0 minutes</b> , a penalty of <b> +9 points </b> will be applied to each inactive player in your XI.</p>
+
+            </div>
+        </div>
+        <div class="p-1 w-1/2 flex flex-wrap md:flex-nowrap rounded-lg border-1 ml-2 dark:border-gray-500">
+            <div class="md:flex-grow">
+                <h2 class="text-2xl font-medium text-gray-900 title-font mb-2 dark:text-gray-200">
+                    Bank penalty
+                </h2>
+                <p class="leading-relaxed dark:text-gray-300">
+                   At no time can your team have <b> more than £3.0 </b> in the bank. Having a squad with more than £3.0 in
+                 the bank will will result in a <b>+25 points </b> penalty for the week. Repeat offenders will be kicked out
+                  of the league.</p>
+
+            </div>
+        </div>
+    </div>
+    <div class="flex ">
+        <div class="p-1 w-1/2 flex flex-wrap md:flex-nowrap rounded-lg border-1 mr-2 dark:border-gray-500">
+            <div class="md:flex-grow">
+                <h2 class="text-2xl font-medium text-gray-900 title-font mb-2 dark:text-gray-200">
+                   Hits
+                </h2>
+                <p class="leading-relaxed dark:text-gray-300">
+                  Normal FPL transfer rules apply, if you take a hit it will be <b>added</b> to your points and not subtracted.  </p>
+
+            </div>
+        </div>
+        <div class="p-1 w-1/2 flex flex-wrap md:flex-nowrap rounded-lg border-1 ml-2 dark:border-gray-500">
+            <div class="md:flex-grow">
+                <h2 class="text-2xl font-medium text-gray-900 title-font mb-2 dark:text-gray-200">
+                    C/VC Failure to play 
+                </h2>
+                <p class="leading-relaxed dark:text-gray-300">
+                   If your Captain or Vice Captain fails to play you will receive a <b> +15 points </b> penalty to your gameweek score.</p>
+
+
+            </div>
+        </div>
+    </div>
+    <div class="flex ">
+        <div class="p-1 w-1/2 flex flex-wrap md:flex-nowrap rounded-lg border-1 mr-2 dark:border-gray-500">
+            <div class="md:flex-grow">
+                <h2 class="text-2xl font-medium text-gray-900 title-font mb-2 dark:text-gray-200">
+                   Chip Rules
+                </h2>
+                <p class="leading-relaxed dark:text-gray-300">
+                    All chips (wildcard optional) must be used by the end of GW38. Failure to use your chips will
+                 result in a <b>+25 points </b> penalty per chip to be applied to your GW38 score. Also, you won't be eligible
+                 to will the league or the cup.</p>
+
+
+            </div>
+        </div>
+        <div class="p-1 w-1/2 flex flex-wrap md:flex-nowrap rounded-lg border-1 ml-2 dark:border-gray-500">
+            <div class="md:flex-grow">
+                <h2 class="text-2xl font-medium text-gray-900 title-font mb-2 dark:text-gray-200">
+                    Bench Boost Explained
+                </h2>
+                <p class="leading-relaxed dark:text-gray-300">
+                  When using the bench boost chip, scoring will be done on <b>15 of your players</b>. So if you have 11 
+                players that actually play but 4 on your bench that register 0 minutes you will get inactive player penalty to 
+                the 4 players on your bench. So when you decide to use BB make sure everyone on your team actually gets minutes</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock content %}

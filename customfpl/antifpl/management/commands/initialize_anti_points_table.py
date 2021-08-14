@@ -1,6 +1,7 @@
 from antifpl.models import Manager, PointsTable
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist
 
 """ 
 Initializes anti points table for the first time 
@@ -17,6 +18,8 @@ def intialize_gw0():
     with transaction.atomic():
         for manager in all_managers:
             try:
+                PointsTable.objects.get(manager=manager, gw=0)
+            except ObjectDoesNotExist:
                 PointsTable.objects.create(
                     manager=manager,
                     gw=0,
@@ -32,8 +35,6 @@ def intialize_gw0():
                     total=0,
                 )
                 counter += 1
-            except Exception as e:
-                print(e)
     print(f"Points table updated with gw 0 : {counter}")
 
 
