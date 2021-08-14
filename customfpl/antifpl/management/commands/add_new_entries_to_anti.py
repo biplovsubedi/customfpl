@@ -10,7 +10,11 @@ Usage: python manage.py add_new_entries_to_anti --settings=customfpl.settings.pr
 
 from django.core.management.base import BaseCommand, CommandError
 import antifpl.models as anti
-from utils.url_endpoints import URL_NEW_ENTRIES_ANTI, LEAGUE_CODE_ANTI
+from utils.url_endpoints import (
+    URL_NEW_ENTRIES_ANTI,
+    LEAGUE_CODE_ANTI,
+    URL_STANDINGS_BASE_ANTI,
+)
 from utils.request_service import request_data_from_url
 
 
@@ -35,11 +39,30 @@ class AddNewAntiPlayers:
             else:
                 return all_new_entries
 
+    @staticmethod
+    def get_all_old_entries():
+        all_old_entries = []
+        page_no = 1
+        while True:
+            request_url = f"{URL_STANDINGS_BASE_ANTI}{page_no}"
+            print(request_url)
+
+            response_data = request_data_from_url(request_url)
+
+            all_old_entries.extend(response_data["standings"]["results"])
+
+            if response_data["standings"]["has_next"]:
+                page_no += 1
+            else:
+                return all_old_entries
+
     def process(self):
 
         new_entries = self.__class__.get_all_new_entries()
+        old_entries = self.__class__.get_all_old_entries()
+
         added_entries_counter = 0
-        for entry in new_entries:
+        for entry in new_entries + old_entries:
             try:
                 anti.Manager.objects.create(
                     team_id=entry["entry"],

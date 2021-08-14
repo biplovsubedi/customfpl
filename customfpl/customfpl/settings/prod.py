@@ -1,9 +1,9 @@
 from .base import *
 
-ALLOWED_HOSTS = ["customfpl.pythonanywhere.com"]
+ALLOWED_HOSTS = ["antifpl.pythonanywhere.com"]
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-bj+(xr*n5rk@(0))ntjfe*y63*rpacb7@rw2x6li9f@ryhlzk6"
+SECRET_KEY = "kg6xcyia-i*e&+aeew5ca^ig&n9+#8sk8k+d*!j6)pfxz*tp30"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
