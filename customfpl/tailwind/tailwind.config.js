@@ -4,7 +4,7 @@ module.exports = {
     purgeLayersByDefault: true,
   },
   purge: {
-    enabled: false, //true for production build
+    enabled: true, //true for production build
     content: [
       '../**/templates/*.html',
       '../**/templates/**/*.html'
