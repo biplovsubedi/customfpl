@@ -53,7 +53,7 @@ Gameweek Stats - Anti FPL
                         {{ player.footballer.name }}
                         </a>
                     </td>
-                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.footballer.cost }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.footballer.cost|normalize_team_value  }}</td>
                     <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.footballer.form_5_gw }}</td>
                     <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.footballer.form_season }}</td>
                     <td class="border-dashed border-t border-gray-200 text-sm ">{{ player.footballer.points_per_mil_5_gw }}</td>

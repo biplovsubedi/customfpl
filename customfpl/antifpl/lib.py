@@ -391,7 +391,7 @@ class Antifpl(JsonData):
                     # )
                     footballer_performance.minutes = stats["minutes"]
                     footballer_performance.points = stats["points"]
-                    footballer_performance.anti_points = anti_points
+                    footballer_performance.anti_points = stats["points"]
                     footballer_performance.save()
                 except ObjectDoesNotExist:
                     break_flag = True
@@ -525,6 +525,7 @@ class Antifpl(JsonData):
         if self.gameweek.completed:
             # Stats not completed
             self.update_dynamic_stats_footballer(gw_completed=True)
+            return anti.FootballerPerformanceAnti.objects.filter(gw=self.gw)
 
         if timezone.now() > self.gameweek.last_stats_updated + datetime.timedelta(
             minutes=st.MAX_REFRESH_MINS

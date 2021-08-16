@@ -64,14 +64,18 @@ class AddNewAntiPlayers:
         added_entries_counter = 0
         for entry in new_entries + old_entries:
             try:
+                manager_name = f"{entry['player_first_name']} {entry['player_last_name']}"
+            except KeyError:
+                manager_name = entry["player_name"]
+            try:
                 anti.Manager.objects.create(
                     team_id=entry["entry"],
                     team_name=entry["entry_name"],
-                    manager_id=entry["entry"],  # TODO: Fix this
-                    manager_name=f"{entry['player_first_name']} {entry['player_last_name']}",
+                    manager_id=entry["id"],  # TODO: Fix this
+                    manager_name=manager_name,
                 )
                 added_entries_counter += 1
-            except:
+            except Exception as e:
                 print(f"Manager Exists - {entry}")
         return added_entries_counter
 
