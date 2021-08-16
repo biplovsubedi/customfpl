@@ -391,7 +391,7 @@ class Antifpl(JsonData):
                     # )
                     footballer_performance.minutes = stats["minutes"]
                     footballer_performance.points = stats["points"]
-                    footballer_performance.anti_points = stats["points"]
+                    footballer_performance.anti_points = anti_points
                     footballer_performance.save()
                 except ObjectDoesNotExist:
                     break_flag = True
@@ -503,7 +503,6 @@ class Antifpl(JsonData):
         if timezone.now() > self.gameweek.last_updated + datetime.timedelta(
             minutes=st.MAX_REFRESH_MINS
         ):
-            print("fsfjsfkj")
             self.update_gameweek()
         print(
             timezone.now(),
