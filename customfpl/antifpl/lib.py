@@ -20,6 +20,7 @@ from django.db.models import Avg
 CAPTAIN_PENALTY = 15
 INACTIVE_PLAYER_PENALTY = 9
 BANK_PENALTY = 25
+CHIP_PENALTY = 25
 
 
 class Antifpl(JsonData):
@@ -150,6 +151,10 @@ class Antifpl(JsonData):
                 + inactive_players_pens
             )
             total = gw_points + last_gw_points
+
+            # add 25 to captain penalty if captain penalty in triple gw
+            if picks.active_chip == "3xc" and captain_penalty == CAPTAIN_PENALTY:
+                captain_penalty += CHIP_PENALTY
 
             final_gw_total.append(
                 {

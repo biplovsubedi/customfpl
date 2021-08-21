@@ -88,7 +88,7 @@ class Picks:
             self.bank = picks["entry_history"]["bank"]
             self.team_value = picks["entry_history"]["value"]
             self.transfers = picks["entry_history"]["event_transfers"]
-            self.transfers_cost = picks["entry_history"]["event_transfers"]
+            self.transfers_cost = picks["entry_history"]["event_transfers_cost"]
             self.squad = Squad(picks["picks"])
 
         except KeyError:
