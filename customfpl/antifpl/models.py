@@ -38,6 +38,7 @@ class PointsTable(auto_prefetch.Model):
     transfers = models.IntegerField(_("Transfers"))
     transfers_hits = models.IntegerField(_("Transfer Hits"))
     chip = models.CharField(_("Chip"), max_length=10, null=True)
+    chip_pen = models.IntegerField(_("Chip Penalty"), blank=True, null=True)
     last_gw = models.IntegerField(_("Last GW Points"))
     site_points = models.IntegerField(_("Site Points"), default=0)
     cvc_pens = models.IntegerField(_("Captain/VC Penalty"), null=True)

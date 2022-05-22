@@ -105,6 +105,24 @@ class Antifpl(JsonData):
         """
         return BANK_PENALTY if itb > 30 else 0
 
+    def find_chip_usage_penalty(self, team_id):
+        """Find chip usage penalty for each manager at the end of the season
+
+        Each chip usage penalty is +25 points, failure to use, bbost, 3xc will add this penalty
+
+        Args:
+            team_id (_type_): _description_
+        """
+        boost_count = anti.PointsTable.objects.filter(
+            manager__team_id=team_id, chip="bboost"
+        ).count()
+        tc_count = anti.PointsTable.objects.filter(
+            manager__team_id=team_id, chip="3xc"
+        ).count()
+        
+        return (2 - boost_count - tc_count) * 25
+        
+
     def complete_gameweek(self):
         """This function is called when a gameweek is completed and all
         the gameweek related info needs to be saved
@@ -151,6 +169,11 @@ class Antifpl(JsonData):
                 + inactive_players_pens
             )
             total = gw_points + last_gw_points
+            chip_pen = 0
+            if self.gw == 38:
+                # Last gw so, find chip usage penalty
+                chip_pen = self.find_chip_usage_penalty(team_id)
+                total += chip_pen
 
             # add 25 to captain penalty if captain penalty in triple gw
             if picks.active_chip == "3xc" and captain_penalty == CAPTAIN_PENALTY:
@@ -163,6 +186,7 @@ class Antifpl(JsonData):
                     "cvc_pens": captain_penalty,
                     "inactive_players": inactive_players,
                     "inactive_players_pens": inactive_players_pens,
+                    "chip_pen" : chip_pen,
                     "gw_points": gw_points,
                     "total": total,
                 }

@@ -45,6 +45,9 @@ Points Table - GW {{ current_gw.id }} - Anti FPL
                     <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">C/VC Pens</th>
                     <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Inactive Players</th>
                     {% endif %}
+                    {% if current_gw.id == 38 %}
+                    <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Chip Penalty</th>
+                    {% endif %}
                     
                     <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Last GW</th>
                     <th class="bg-white sticky top-0 border-b border-gray-200 text-gray-600 text-xs ">Site Points</th>
@@ -87,6 +90,9 @@ Points Table - GW {{ current_gw.id }} - Anti FPL
                     {% if current_gw.completed %}
                     <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.cvc_pens|remove_zero }}</td>
                     <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.inactive_players|remove_zero }}</td>
+                    {% endif %}
+                    {% if current_gw.id == 38 %}
+                    <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.chip_pen|remove_zero }}</td>
                     {% endif %}
                     <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.last_gw }}</td>
                     <td  class="border-dashed border-t border-gray-200 text-sm ">{{ manager.site_points }}</td>
