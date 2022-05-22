@@ -107,8 +107,8 @@
                     
                     <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.gw.id }}</td>
                     <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.footballer.cost|normalize_team_value }}</td>
-                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.form_5_gw }}</td>
-                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.form_season }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.form_5_gw|floatformat:2 }}</td>
+                    <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.form_season|floatformat:2 }}</td>
                     <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.points_per_mil_5_gw }}</td>
                     <td class="border-dashed border-t border-gray-200 text-sm ">{{ performance.points_per_mil_season }}</td>
 
