@@ -57,7 +57,7 @@ class GameweekService:
         )
         if item.count() == 0:
             print("Raise Error - no gw found")
-            return 0
+            return 38
         return item[0].id
 
     def is_gw_completed(self, gw=None):
