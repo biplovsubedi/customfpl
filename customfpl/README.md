@@ -4,18 +4,18 @@ Update anti league code in utils.url_endpoints.py
 
 ### Create fixtures - Remove jsondata/fixtures.json
 ```sh
-python manage.py add_update_fixtures --settings=customfpl.settings.develop
+python manage.py add_update_fixtures --settings=customfpl.settings.prod
 ```
 
 ### Add new EPL teams
 ```sh
-python manage.py add_new_teams --settings=customfpl.settings.develop
+python manage.py add_new_teams --settings=customfpl.settings.prod
 ```
 
 
 ### Add new entries for postions 
 ```sh
-python manage.py shell --settings=customfpl.settings.develop
+python manage.py shell --settings=customfpl.settings.prod
 ```
 Inside of a session 
 
@@ -34,16 +34,16 @@ fwd.save()
 
 ### Add new footballers
 ```sh
-python manage.py add_new_footballers --settings=customfpl.settings.develop
+python manage.py add_new_footballers --settings=customfpl.settings.prod
 ```
 
 ### Add new entries to anti 
 ```sh
-python manage.py add_new_entries_to_anti --settings=customfpl.settings.develop
+python manage.py add_new_entries_to_anti --settings=customfpl.settings.prod
 ```
 
 ### Initialize anit points table
 ```sh
-python manage.py initialize_anti_points_table --settings=customfpl.settings.develop
+python manage.py initialize_anti_points_table --settings=customfpl.settings.prod
 ```
 
