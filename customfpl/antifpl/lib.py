@@ -161,7 +161,7 @@ class Antifpl(JsonData):
             )
             # add 25 to captain penalty if captain penalty in triple gw
             if picks.active_chip == "3xc" and captain_penalty == CAPTAIN_PENALTY:
-                captain_penalty += CHIP_PENALTY
+                captain_penalty = CHIP_PENALTY
             
             transfer_hits = picks.transfers_cost
             bank_penalty = self.__class__.get_bank_penalty(picks.bank)
