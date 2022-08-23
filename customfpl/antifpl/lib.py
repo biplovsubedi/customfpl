@@ -159,6 +159,10 @@ class Antifpl(JsonData):
             captain_penalty = self.__class__.get_captain_penalty(
                 picks, all_players_mins
             )
+            # add 25 to captain penalty if captain penalty in triple gw
+            if picks.active_chip == "3xc" and captain_penalty == CAPTAIN_PENALTY:
+                captain_penalty += CHIP_PENALTY
+            
             transfer_hits = picks.transfers_cost
             bank_penalty = self.__class__.get_bank_penalty(picks.bank)
             gw_points = (
@@ -175,9 +179,6 @@ class Antifpl(JsonData):
                 chip_pen = self.find_chip_usage_penalty(team_id)
                 total += chip_pen
 
-            # add 25 to captain penalty if captain penalty in triple gw
-            if picks.active_chip == "3xc" and captain_penalty == CAPTAIN_PENALTY:
-                captain_penalty += CHIP_PENALTY
 
             final_gw_total.append(
                 {
