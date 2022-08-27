@@ -119,9 +119,8 @@ class Antifpl(JsonData):
         tc_count = anti.PointsTable.objects.filter(
             manager__team_id=team_id, chip="3xc"
         ).count()
-        
+
         return (2 - boost_count - tc_count) * 25
-        
 
     def complete_gameweek(self):
         """This function is called when a gameweek is completed and all
@@ -162,7 +161,7 @@ class Antifpl(JsonData):
             # add 25 to captain penalty if captain penalty in triple gw
             if picks.active_chip == "3xc" and captain_penalty == CAPTAIN_PENALTY:
                 captain_penalty = CHIP_PENALTY
-            
+
             transfer_hits = picks.transfers_cost
             bank_penalty = self.__class__.get_bank_penalty(picks.bank)
             gw_points = (
@@ -179,7 +178,6 @@ class Antifpl(JsonData):
                 chip_pen = self.find_chip_usage_penalty(team_id)
                 total += chip_pen
 
-
             final_gw_total.append(
                 {
                     "team_id": team_id,
@@ -187,7 +185,7 @@ class Antifpl(JsonData):
                     "cvc_pens": captain_penalty,
                     "inactive_players": inactive_players,
                     "inactive_players_pens": inactive_players_pens,
-                    "chip_pen" : chip_pen,
+                    "chip_pen": chip_pen,
                     "gw_points": gw_points,
                     "total": total,
                 }
@@ -362,12 +360,18 @@ class Antifpl(JsonData):
         )
         for footballer_performance in all_footballers_performance:
 
-            form_5gw = anti.FootballerPerformanceAnti.objects.filter(
-                gw__id__gt=self.gw - 5, footballer=footballer_performance.footballer
-            ).aggregate(Avg("anti_points"))["anti_points__avg"]
-            form_season = anti.FootballerPerformanceAnti.objects.filter(
-                footballer=footballer_performance.footballer
-            ).aggregate(Avg("anti_points"))["anti_points__avg"]
+            form_5gw = round(
+                anti.FootballerPerformanceAnti.objects.filter(
+                    gw__id__gt=self.gw - 5, footballer=footballer_performance.footballer
+                ).aggregate(Avg("anti_points"))["anti_points__avg"],
+                3,
+            )
+            form_season = round(
+                anti.FootballerPerformanceAnti.objects.filter(
+                    footballer=footballer_performance.footballer
+                ).aggregate(Avg("anti_points"))["anti_points__avg"],
+                3,
+            )
 
             ppm_5gw = round(form_5gw / float(footballer_performance.footballer.cost), 3)
             ppm_season = round(
