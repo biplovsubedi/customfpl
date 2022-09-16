@@ -139,6 +139,8 @@ class Antifpl(JsonData):
         all_players_mins = self.gameweek_service.get_players_minutes()
 
         last_gw_points_dict = self.get_last_gw_points()
+        
+        is_gw_active = self.gameweek_service.is_gw_active(self.gw)
 
         # Finalize the points scored by all the players
         final_gw_total = []
@@ -164,6 +166,11 @@ class Antifpl(JsonData):
 
             transfer_hits = picks.transfers_cost
             bank_penalty = self.__class__.get_bank_penalty(picks.bank)
+            if not is_gw_active:
+                bank_penalty = 0
+                captain_penalty = 0
+                inactive_players_pens = 0
+                inactive_players = 0
             gw_points = (
                 picks.points
                 + bank_penalty

@@ -85,6 +85,13 @@ class GameweekService:
             if ev["id"] == int(gw):
                 return ev["finished"] and ev["data_checked"]
         return False
+    
+    def is_gw_active(self, gw=None):
+        """Checks if the gameweek is active or not"""
+        if not gw:
+            gw = self.find_current_gw()
+        
+        return Gameweek.objects.get(id=gw).active_gameweek
 
     def get_gw_players_data(self, gw=None):
         """Get data of the players in a given gameweek

@@ -36,6 +36,7 @@ class Gameweek(models.Model):
     last_stats_updated = models.DateTimeField(
         _("Last Stats Updated Time"), auto_now=True
     )
+    active_gameweek = models.BooleanField(_("Active Gameweek"), default=True)
 
     class Meta:
         verbose_name = _("Gameweek")
