@@ -121,3 +121,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 JSON_ROOT = BASE_DIR / "jsondata"
 
 MAX_REFRESH_MINS = 10  # max time between webapp refreshes
+
+
+# Caching related 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+        'LOCATION': '127.0.0.1:9000',
+    }
+}
