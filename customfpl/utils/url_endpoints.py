@@ -1,4 +1,4 @@
-LEAGUE_CODE_ANTI = "328727"
+LEAGUE_CODE_ANTI = "339171"
 
 
 # Api endpoints for fpl
