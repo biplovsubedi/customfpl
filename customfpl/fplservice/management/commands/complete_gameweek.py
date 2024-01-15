@@ -20,16 +20,16 @@ class Command(BaseCommand):
     
     
     def handle(self, *args, **options):
-        start_gameweek = options['gameweek']
-        end_gameweek = options['recursive']
+        start_gameweek = options['start_gameweek']
+        end_gameweek = options['end_gameweek']
         print(f"Completing gameweeks in range {start_gameweek} - {end_gameweek}")
         for cur_gw in range(start_gameweek, end_gameweek+1):
-            print(f"current gw: {cur_gw}")
+            print(f"starting gw: {cur_gw}")
             antifpl = Antifpl(gw=cur_gw)
             # Delete Points data before creating new
             PointsTable.objects.filter(gw=cur_gw).delete()
             antifpl.start_gameweek()
-            print("Completing gw")
+            print(f"Completing gw {cur_gw}")
             antifpl.complete_gameweek()
             
             
