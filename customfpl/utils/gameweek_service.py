@@ -139,7 +139,7 @@ class GameweekService:
         if self.players_minutes:
             return self.players_minutes
 
-        players = self.get_gw_players_data()
+        players = self.get_gw_players_data(gw)
 
         _players_minutes = {p["id"]: p["stats"]["minutes"] for p in players}
         self.players_minutes = _players_minutes
@@ -165,7 +165,7 @@ class GameweekService:
         if self.players_points:
             return self.players_points
 
-        players = self.get_gw_players_data()
+        players = self.get_gw_players_data(gw)
         _players_points = {}
         for p in players:
             if only_played and p["stats"]["minutes"] == 0:

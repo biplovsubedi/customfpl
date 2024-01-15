@@ -11,7 +11,6 @@ from django.utils import timezone
 from utils.request_service import request_data_from_url
 from utils.url_endpoints import URL_BOOTSTRAP_STATIC
 
-from os.path import join
 from django.db import transaction
 from fplservice.models import Footballer, Position, TeamMeta
 from django.core.exceptions import ObjectDoesNotExist

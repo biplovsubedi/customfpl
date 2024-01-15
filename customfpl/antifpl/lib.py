@@ -34,12 +34,12 @@ class Antifpl(JsonData):
 
     """
 
-    def __init__(self):
+    def __init__(self, gw=None):
         self.storage_file_path = join(
             self.storage_root, join("antifpl_data", "live.json")
         )
         self.gameweek_service = GameweekService()
-        self.gw = self.gameweek_service.find_current_gw()
+        self.gw = gw or self.gameweek_service.find_current_gw()
 
     def get_last_gw_points(self):
         """Returns a dict of team_id : points of last gw"""
@@ -81,7 +81,7 @@ class Antifpl(JsonData):
         return abs(total_players - active_cnt)
 
     @staticmethod
-    def get_captain_penalty(picks, all_players_mins):
+    def get_captain_penalty(picks: Picks, all_players_mins):
         """Calculate the penalties for inactive captain/vc
 
         C/VC penalty -> C/VC failed to play (+15 Points)
@@ -135,8 +135,9 @@ class Antifpl(JsonData):
         all_managers_picks = self.gameweek_picks.get_gw_picks()
 
         # Get the points scored by all the players
-        all_players_points = self.gameweek_service.get_players_points()
-        all_players_mins = self.gameweek_service.get_players_minutes()
+        all_players_points = self.gameweek_service.get_players_points(self.gw)
+        all_players_mins = self.gameweek_service.get_players_minutes(self.gw)
+        print(f"current gw {self.gw}")
 
         last_gw_points_dict = self.get_last_gw_points()
         
@@ -150,7 +151,7 @@ class Antifpl(JsonData):
             try:
                 last_gw_points = last_gw_points_dict[team_id]
             except KeyError:
-                print("Raise Error - No points last gw")
+                print(f"Raise Error - No points last gw {team_id}")
                 last_gw_points = 0
 
             inactive_players = self.__class__.get_inactive_players(
@@ -295,6 +296,7 @@ class Antifpl(JsonData):
         add_update_footballers_meta()
 
         self.gameweek_picks = GameweekPicks(gw=self.gw)
+        self.gameweek_picks.delete_json_data()
         all_managers_picks = self.gameweek_picks.get_gw_picks()
 
         last_gw_points_dict = self.get_last_gw_points()
