@@ -1,6 +1,6 @@
 """ 
 Usage: 
-python manage.py complete_gameweek --settings=customfpl.settings.prod 1 true 
+python manage.py complete_gameweek --settings=customfpl.settings.prod 20 true 
 python manage.py complete_gameweek --settings=customfpl.settings.develop 2
 """
 
@@ -15,21 +15,15 @@ class Command(BaseCommand):
     help = "Update a desired gameweek or upto a gw"
     
     def add_arguments(self, parser):
-        parser.add_argument('gameweek', type=int)
-        parser.add_argument('recursive', type=bool)
+        parser.add_argument('start_gameweek', type=int)
+        parser.add_argument('end_gameweek', type=int)
     
     
     def handle(self, *args, **options):
-        gameweek = options['gameweek']
-        recursive = options['recursive']
-        if recursive:
-            return self.handle_recursive(gameweek)
-        antifpl = Antifpl(gw=gameweek)
-        antifpl.complete_gameweek()
-        
-    def handle_recursive(self, gw: int):
-        print("Handling recursive calls for complete gw")
-        for cur_gw in range(1, gw+1):
+        start_gameweek = options['gameweek']
+        end_gameweek = options['recursive']
+        print(f"Completing gameweeks in range {start_gameweek} - {end_gameweek}")
+        for cur_gw in range(start_gameweek, end_gameweek+1):
             print(f"current gw: {cur_gw}")
             antifpl = Antifpl(gw=cur_gw)
             # Delete Points data before creating new
