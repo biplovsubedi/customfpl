@@ -12,7 +12,7 @@ from antifpl.lib import Antifpl
 from antifpl.models import Manager
     
 class Command(BaseCommand):
-    help = "Update a desired gameweek or upto a gw"
+    help = "Delete managers using their id from the database"
     
     def add_arguments(self, parser):
         parser.add_argument(
