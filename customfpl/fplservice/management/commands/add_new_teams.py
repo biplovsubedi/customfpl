@@ -11,7 +11,7 @@ from fplservice.models import TeamMeta
 from django.core.exceptions import ObjectDoesNotExist
 
 
-def get_footballers_list():
+def get_teams_list():
 
     bootstrap_static_data = request_data_from_url(URL_BOOTSTRAP_STATIC)
     try:
@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         counter = 0
-        team_list = get_footballers_list()
+        team_list = get_teams_list()
         for team in team_list:
             try:
                 TeamMeta.objects.get(id=team["id"])

@@ -1,6 +1,17 @@
 # Preparing for new season
+- Delete the jsondata files 
+- Update anti league code in utils.url_endpoints.py
 
-Update anti league code in utils.url_endpoints.py
+## Remove the old db and init new db
+```sh
+python manage.py makemigrations --settings=customfpl.settings.prod
+python manage.py migrate --settings=customfpl.settings.prod
+```
+
+### Create superuser with same creds as last year
+```sh
+python manage.py createsuperuser --settings=customfpl.settings.prod
+```
 
 ### Create fixtures - Remove jsondata/fixtures.json
 ```sh
