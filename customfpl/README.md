@@ -40,6 +40,8 @@ mid = Position(id=3, name="Midfielder", squad_max_play=5, squad_min_play=2, squa
 mid.save()
 fwd = Position(id=4, name="Forward", squad_max_play=3, squad_min_play=1, squad_max_select=3)
 fwd.save()
+mgr = Position(id=5, name="Manager", squad_max_play=1, squad_min_play=0, squad_max_select=1)
+mgr.save()
 ```
 
 
@@ -53,8 +55,12 @@ python manage.py add_new_footballers --settings=customfpl.settings.prod
 python manage.py add_new_entries_to_anti --settings=customfpl.settings.prod
 ```
 
-### Initialize anit points table
+### Initialize anti points table
 ```sh
 python manage.py initialize_anti_points_table --settings=customfpl.settings.prod
 ```
 
+### Complete gameweeks in range
+```sh
+python manage.py complete_gameweek --settings=customfpl.settings.prod 20 24 # completes all gw in this range
+```
