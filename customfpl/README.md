@@ -40,6 +40,7 @@ mid = Position(id=3, name="Midfielder", squad_max_play=5, squad_min_play=2, squa
 mid.save()
 fwd = Position(id=4, name="Forward", squad_max_play=3, squad_min_play=1, squad_max_select=3)
 fwd.save()
+exit()
 ```
 
 
@@ -53,8 +54,13 @@ python manage.py add_new_footballers --settings=customfpl.settings.prod
 python manage.py add_new_entries_to_anti --settings=customfpl.settings.prod
 ```
 
-### Initialize anit points table
+### Initialize anti points table
 ```sh
 python manage.py initialize_anti_points_table --settings=customfpl.settings.prod
+```
+
+### Run the server and validate
+```sh
+python manage.py runserver --settings=customfpl.settings.prod
 ```
 
