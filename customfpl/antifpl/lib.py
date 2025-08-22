@@ -105,7 +105,7 @@ class Antifpl(JsonData):
         """
         return BANK_PENALTY if itb > 30 else 0
 
-    def find_chip_usage_penalty(self, team_id):
+    def find_chip_usage_penalty(self, team_id, to_use: int):
         """Find chip usage penalty for each manager at the end of the season
 
         Each chip usage penalty is +25 points, failure to use, bbost, 3xc will add this penalty
@@ -120,7 +120,7 @@ class Antifpl(JsonData):
             manager__team_id=team_id, chip="3xc"
         ).count()
 
-        return (2 - boost_count - tc_count) * 25
+        return (to_use - boost_count - tc_count) * 25
 
     def complete_gameweek(self):
         """This function is called when a gameweek is completed and all
@@ -181,9 +181,13 @@ class Antifpl(JsonData):
             )
             total = gw_points + last_gw_points
             chip_pen = 0
-            if self.gw == 38:
+            if self.gw == 19:
+                # First half of the season, find chip usage penalty
+                chip_pen = self.find_chip_usage_penalty(team_id, 2)
+                total += chip_pen
+            elif self.gw == 38:
                 # Last gw so, find chip usage penalty
-                chip_pen = self.find_chip_usage_penalty(team_id)
+                chip_pen = self.find_chip_usage_penalty(team_id, 4)
                 total += chip_pen
 
             final_gw_total.append(
