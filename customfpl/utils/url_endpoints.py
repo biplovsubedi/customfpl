@@ -13,6 +13,9 @@ URL_GW_LIVE = "https://fantasy.premierleague.com/api/event/{gw}/live/"
 # Returns the gw picks for a manager in a gw
 URL_GW_PICKS = "https://fantasy.premierleague.com/api/entry/{entry}/event/{gw}/picks/"
 
+# Returns the entry details of a manager
+URL_ENTRY_DETAILS = "https://fantasy.premierleague.com/api/entry/{entry}/"
+
 # Returns almost everything about FPL (Here it is used to check if a GW has been completed or not)
 URL_BOOTSTRAP_STATIC = "https://fantasy.premierleague.com/api/bootstrap-static/"
 

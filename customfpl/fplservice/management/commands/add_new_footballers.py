@@ -33,7 +33,7 @@ def add_update_footballers_meta():
     with transaction.atomic():
         for footballer in footballer_list:
             try:
-                Footballer.objects.get(id=footballer["id"])
+                existing_footballer = Footballer.objects.get(id=footballer["id"])
                 Footballer.objects.filter(id=footballer["id"]).update(
                     cost=footballer["now_cost"],
                     assists=footballer["assists"],
@@ -45,20 +45,25 @@ def add_update_footballers_meta():
                 )
                 updated += 1
             except ObjectDoesNotExist:
-                Footballer.objects.create(
-                    id=footballer["id"],
-                    name=footballer["web_name"],
-                    team=TeamMeta.objects.get(id=footballer["team"]),
-                    position=Position.objects.get(id=footballer["element_type"]),
-                    cost=footballer["now_cost"],
-                    assists=footballer["assists"],
-                    goals_conceded=footballer["goals_conceded"],
-                    clean_sheets=footballer["clean_sheets"],
-                    goals_scored=footballer["goals_scored"],
-                    yellow_cards=footballer["yellow_cards"],
-                    red_cards=footballer["red_cards"],
-                )
-                added += 1
+                try:
+                    Footballer.objects.create(
+                        id=footballer["id"],
+                        name=footballer["web_name"],
+                        team=TeamMeta.objects.get(id=footballer["team"]),
+                        position=Position.objects.get(id=footballer["element_type"]),
+                        cost=footballer["now_cost"],
+                        assists=footballer["assists"],
+                        goals_conceded=footballer["goals_conceded"],
+                        clean_sheets=footballer["clean_sheets"],
+                        goals_scored=footballer["goals_scored"],
+                        yellow_cards=footballer["yellow_cards"],
+                        red_cards=footballer["red_cards"],
+                    )
+                    added += 1
+                except (TeamMeta.DoesNotExist, Position.DoesNotExist) as e:
+                    print(f"Error creating footballer {footballer['web_name']}: {e}")
+            except Exception as e:
+                print(f"Unexpected error processing footballer {footballer['web_name']}: {e}")
     print(f"Total Footballers added : {added} , updated: {updated}")
 
 
